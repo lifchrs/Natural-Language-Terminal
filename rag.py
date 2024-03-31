@@ -2,6 +2,7 @@ from transformers import DPRContextEncoder, DPRContextEncoderTokenizerFast, RagR
 from datasets import Dataset, Features, Sequence, Value
 from functools import partial
 from config import batch_size, device, output_dir, data_dir, resource_file
+from getHelp import commands
 import faiss
 import os
 
@@ -21,7 +22,6 @@ def load_text(commands):
         return contents
     return [read_file(f"{os.path.join(data_dir, command)}.txt") for command in commands]
 
-commands = ["ls"]
 text = load_text(commands)
 dpr_ctx_encoder_model_name = "facebook/dpr-ctx_encoder-multiset-base"
 dataset = Dataset.from_dict({"title": commands, "text": text})
