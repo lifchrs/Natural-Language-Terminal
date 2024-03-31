@@ -1,15 +1,9 @@
 from transformers import DPRContextEncoder, DPRContextEncoderTokenizerFast, RagRetriever
 from datasets import Datasets, Features, Sequence, Value
 from functools import partial
-
-import torch
-import os
+from config import batch_size, device, output_dir, data_dir, resource_file
 import faiss
-
-
-device = "cuda" if torch.cuda.is_available() else "cpu"
-batch_size = 2
-output_dir = "database"
+import os
 
 
 def embed(documents, ctx_encoder, ctx_tokenizer):
@@ -26,7 +20,7 @@ def load_text(commands):
         with open(filename, "r") as file:
             contents = file.read()
         return contents
-    return [read_file(f"{command}.txt") for command in commands]
+    return [read_file(f"{os.path.join(data_dir, command)}.txt") for command in commands]
 
 commands = []
 text = load_text(commands)
@@ -47,12 +41,10 @@ dataset = dataset.map(
     features=new_features,
 )
 
-
-dataset.save_to_disk("command_resources")
-
+dataset.save_to_disk(resource_file)
 
 index = faiss.IndexHNSWFlat(768, 128, faiss.METRIC_INNER_PRODUCT)
 dataset.add_faiss_index("embeddings", custom_index=index)
 
-index_path = os.path.join(output_dir, "my_knowledge_dataset_hnsw_index.faiss")
+index_path = os.path.join(output_dir, f"{resource_file}.faiss")
 dataset.get_index("embeddings").save(index_path)
