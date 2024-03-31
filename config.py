@@ -6,3 +6,11 @@ batch_size = 2
 data_dir = "help-docs"
 output_dir = "database"
 resource_file = os.path.join(data_dir, "command_resources")
+
+quantization_config = {
+    "quant_method": "awq",
+    "zero_point": True,
+    "group_size": 128,
+    "bits": 4,
+    "version": "gemm"
+}
