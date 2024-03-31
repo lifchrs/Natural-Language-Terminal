@@ -5,7 +5,7 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 batch_size = 2
 data_dir = "help-docs"
 output_dir = "database"
-resource_file = os.path.join(data_dir, "command_resources")
+resource_file = "command_resources"
 
 quantization_config = {
     "quant_method": "awq",
@@ -13,4 +13,4 @@ quantization_config = {
     "group_size": 128,
     "bits": 4,
     "version": "gemm"
-}
+}   

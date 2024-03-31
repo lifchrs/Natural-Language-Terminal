@@ -1,10 +1,9 @@
 from transformers import DPRContextEncoder, DPRContextEncoderTokenizerFast, RagRetriever
-from datasets import Datasets, Features, Sequence, Value
+from datasets import Dataset, Features, Sequence, Value
 from functools import partial
 from config import batch_size, device, output_dir, data_dir, resource_file
 import faiss
 import os
-
 
 def embed(documents, ctx_encoder, ctx_tokenizer):
     """Compute the DPR embeddings of document passages"""
@@ -22,11 +21,10 @@ def load_text(commands):
         return contents
     return [read_file(f"{os.path.join(data_dir, command)}.txt") for command in commands]
 
-commands = []
+commands = ["ls"]
 text = load_text(commands)
-embeddings = embed(text)
 dpr_ctx_encoder_model_name = "facebook/dpr-ctx_encoder-multiset-base"
-dataset = Datasets.from_dict({"titles": commands, "text": text})
+dataset = Dataset.from_dict({"title": commands, "text": text})
 
 ctx_encoder = DPRContextEncoder.from_pretrained(dpr_ctx_encoder_model_name).to(device=device)
 ctx_tokenizer = DPRContextEncoderTokenizerFast.from_pretrained(dpr_ctx_encoder_model_name)
@@ -41,7 +39,7 @@ dataset = dataset.map(
     features=new_features,
 )
 
-dataset.save_to_disk(resource_file)
+dataset.save_to_disk(os.path.join(output_dir, resource_file))
 
 index = faiss.IndexHNSWFlat(768, 128, faiss.METRIC_INNER_PRODUCT)
 dataset.add_faiss_index("embeddings", custom_index=index)
